@@ -1,12 +1,16 @@
 import math
 import os
 import traceback
+import time
+import random
 import warnings
+from pathlib import Path
 from heapq import heappop, heappush
 from random import randint, shuffle
 from sys import float_info
 from textwrap import dedent
 from typing import Callable, Dict, Iterable, List, Optional, Tuple, Type, Union
+
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -122,8 +126,7 @@ class Map:
             Number of rows and columns in the grid.
         """
         return self._height, self._width
-
-
+    
 def convert_string_to_cells(cell_str: str) -> npt.NDArray:
     """
     Converts a string representation of a grid map, with '#' for obstacles and '.' for free cells, into a binary matrix.
@@ -141,11 +144,10 @@ def convert_string_to_cells(cell_str: str) -> npt.NDArray:
     lines = cell_str.replace(" ", "").split("\n")
 
     cells = np.array(
-        [[1 if char == "#" else 0 for char in line] for line in lines if line],
+        [[1 if char != "." else 0 for char in line] for line in lines if line],
         dtype=np.int8,
     )
     return cells
-
 
 class Node:
     """
@@ -311,8 +313,7 @@ class SearchTreePQD:
     @property
     def number_of_open_dublicates(self):
         return self._enc_open_dublicates
-
-
+    
 def compute_cost_timesteps(i1: int, j1: int, i2: int, j2: int) -> Union[int, float]:
     """
     Computes the cost of simple moves between cells (i1, j1) and (i2, j2) - `wait` action is allowed.
@@ -348,7 +349,6 @@ def compute_cost_timesteps(i1: int, j1: int, i2: int, j2: int) -> Union[int, flo
         raise ValueError(
             "Trying to compute the cost of a non-supported move! ONLY cardinal moves are supported."
         )
-
 
 class CATable:
     """
@@ -531,8 +531,7 @@ class CATable:
             return False
         
         return True
-
-
+        
 def get_neighbors_timestep(
     i: int, j: int, t: int, grid_map: Map, ca_table: CATable
 ) -> List[Tuple[int, int]]:
@@ -567,7 +566,6 @@ def get_neighbors_timestep(
     # YOUR CODE HERE
     return results
 
-
 def manhattan_distance(i1: int, j1: int, i2: int, j2: int) -> Union[int, float]:
     """
     Calculates the Manhattan distance, which is the sum of the absolute differences
@@ -588,7 +586,6 @@ def manhattan_distance(i1: int, j1: int, i2: int, j2: int) -> Union[int, float]:
     # YOUR CODE HERE
     
     return abs(i1 - i2) + abs(j1 - j2)
-
 
 def astar_timesteps(
     task_map: Map,
@@ -636,7 +633,6 @@ def astar_timesteps(
             return False, None, steps, len(ast), None, ast.expanded
         
     return False, None, steps, len(ast), None, ast.expanded
-
 
 def draw_grid(draw_obj: ImageDraw, grid_map: Map, scale: Union[float, int]):
     """
@@ -742,7 +738,6 @@ def draw_dyn_object(
         draw_obj.ellipse([top_left, bottom_right], fill=color)
     else:
         draw_obj.rectangle([top_left, bottom_right], fill=color)
-
 
 def create_frame(
     grid_map,
@@ -862,7 +857,6 @@ def draw(
 
     save_animation(images, output_filename, quality)
 
-
 def make_path(goal: Node) -> Tuple[List[Tuple[int, int]], Union[int, float]]:
     """
     Creates a path by tracing parent pointers from the goal node back to the start node.
@@ -887,7 +881,6 @@ def make_path(goal: Node) -> Tuple[List[Tuple[int, int]], Union[int, float]]:
         current = current.parent
     path.append((current.i, current.j))
     return path[::-1], duration
-
 
 def read_lists_from_file(path: str) -> List[List[Tuple[int, int]]]:
     """
@@ -925,8 +918,7 @@ def read_lists_from_file(path: str) -> List[List[Tuple[int, int]]]:
             main_list.append(curr_list)
 
         return main_list
-
-
+    
 def check_start_goal(
     start: Tuple[int, int], goal: Tuple[int, int], trajectory: List[Tuple[int, int]]
 ) -> bool:
@@ -1076,6 +1068,18 @@ def check_path(
     return check_start_goal(start, goal, path) and check_collisions(
         path, *process_dyn_obstacles(dyn_obst_traj)
     )
+
+def read_map_from_file(path: str) -> npt.NDArray:
+    with open(path) as map_file:
+        type = next(map_file).split(' ')[-1]
+        height = int(next(map_file).split(' ')[-1])
+        width = int(next(map_file).split(' ')[-1])
+        next(map_file)
+        # Read the map section
+        map_lines = [next(map_file) for _ in range(height)]
+        map_str = "".join(map_lines)
+        cells = convert_string_to_cells(map_str)
+    return cells
 
 
 def simple_test(search_function: Callable, task: Union[int, None], *args):
@@ -1239,8 +1243,32 @@ class PTNode:
         Updates cost according to existing plan
         """
         self.cost = sum(len(path) - 1 for path in self.plan)
+    
+def PP(starts, goals, task_map, search_function, *args):
+    n_agents = len(starts)
+    is_find = True
 
+    for _ in range(10):
 
+        priorities = [i for i in range(n_agents)]
+        random.shuffle(priorities)
+        paths = []
+        for agent in priorities:
+            start_i, start_j = starts[agent]
+            goal_i, goal_j = goals[agent]
+
+            new_path = update_plan_for_agent(start_i, start_j, goal_i, goal_j, paths, task_map, search_function, *args)
+            if new_path:
+                paths.append(new_path)
+            else:
+                is_find = False
+                break
+        if is_find:
+            paths_w_priorities = list(zip(priorities, paths))
+            paths_w_priorities.sort()
+            return [path_w_priority[1] for path_w_priority in paths_w_priorities]
+    return None
+    
 class Priorities:
     def __init__(self, n_agents: int) -> None:
         self.n_agents = n_agents
@@ -1279,7 +1307,6 @@ class Priorities:
             higher_priority_agents.add(new_agent)
             higher_priority_agents.update(self.get_higher_priority_agents(new_agent))
         return higher_priority_agents
-
 
 def PBS(starts, goals, task_map, search_function, *args):
     n_agents = len(starts)
@@ -1497,3 +1524,92 @@ def get_map_data():
         )
         cells = convert_string_to_cells(map_str)
         return Map(cells)
+def read_tasks_from_file(path: str) -> npt.NDArray:
+    tasks = []
+    with open(path) as tasks_file:
+        next(tasks_file)
+        for line in tasks_file:
+            values = line.split('\t')[4:]
+            tasks.append([int(x) for x in values[:-1]])
+            # Swap coordinates because of file format
+            tasks[-1][0], tasks[-1][1] = tasks[-1][1], tasks[-1][0]
+            tasks[-1][2], tasks[-1][3] = tasks[-1][3], tasks[-1][2]
+            tasks[-1].append(float(values[-1]))
+    return np.array(sorted(tasks, key=lambda x: x[-1]))
+
+tasks = read_tasks_from_file('scen-even/random-32-32-20-even-1.scen')
+
+
+def test(search_function, scen_path, map_path, *args) -> Dict:
+    """
+    The `massive_test` function runs the `search_function` on a set of different tasks
+    (for example, from the directory `data/`) using *args as optional arguments.
+    For every task, it displays a short report:
+     - 'Path found!' along with some statistics if a path was found.
+     - 'Path not found!' if a path wasn't found.
+     - 'Execution error' if an error occurred during the execution of the search_function.
+
+    The function returns a dictionary containing statistics with the following keys:
+     - "corr" — correctness of each path length (True/False).
+     - "len" — the length of each path (0.0 if a path wasn't found).
+     - "st_size" — the size of the resultant search tree for each task.
+     - "steps" — the number of algorithm steps for each task.
+
+    Parameters
+    ----------
+    search_function : Callable
+        The implemented search method.
+    data_path : str
+        Path to the directory containing tasks.
+    num_of_tasks : int
+        The number of tasks to be used for evaluation.
+
+    Returns
+    -------
+    stat : Dict
+        A dictionary containing statistics.
+
+    """
+    stat = {
+        "corr": [],
+        "len": [],
+        "time": []
+    }
+    max_agent_cnt = 30
+    tasks = read_tasks_from_file(scen_path)
+    cells = read_map_from_file(map_path)
+    task_map = Map(cells)
+    for agent_num in range(1, max_agent_cnt):
+        starts = tasks[:agent_num, [0, 1]].astype(int).tolist()
+        goals = tasks[:agent_num, [2, 3]].astype(int).tolist()
+
+        starts = [tuple(start) for start in starts]
+        goals = [tuple(goal) for goal in goals]
+        
+
+        try:
+            start = time.time()
+            plan = search_function(starts, goals, task_map, *args)
+            end = time.time()
+
+            if plan:
+                path_length = [len(path) for path in plan]
+           
+                stat["len"].append(sum(path_length))
+                stat["corr"].append(True)
+                stat["time"].append(end - start)
+            else:
+                print(f"Task: #{agent_num}. Path not found!")
+                stat["len"].append(-1)
+                stat["corr"].append(False)
+                stat["time"].append(end - start)
+
+        except Exception as e:
+            print(f"Execution error: {e}")
+            traceback.print_exc()
+
+    return stat
+
+
+
+
