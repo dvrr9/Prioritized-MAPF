@@ -49,13 +49,18 @@ class CATable:
         """
         
         for t, (i, j) in enumerate(trajectory):
-            self._pos_time_table[(i, j, t)] = traj_id
+            if (i, j, t) in self._pos_time_table:
+                self._pos_time_table[(i, j, t)].add(traj_id)
+            else:
+                self._pos_time_table[(i, j, t)] = {traj_id}
+
             self._last_visit_table[(i, j)] = max(t, self._last_visit_table.get((i, j), 0))
 
         i_last, j_last = trajectory[-1]
 
         t_last = len(trajectory) - 1
-        
+        if (i_last, j_last) in self._max_time_table:
+            raise Exception('two agent end in the same spot')
         self._max_time_table[(i_last, j_last)] = t_last
 
 
@@ -94,7 +99,7 @@ class CATable:
 
         if  ((i1, j1, t_start+1) in self._pos_time_table and 
             (i2, j2, t_start) in self._pos_time_table and 
-            self._pos_time_table[(i1, j1, t_start+1)] == self._pos_time_table[(i2, j2, t_start)]
+            self._pos_time_table.get((i1, j1, t_start+1), set()).intersection(self._pos_time_table.get((i2, j2, t_start), set()))
             ):
             return False
         
