@@ -24,7 +24,7 @@ class Node:
         self,
         i: int,
         j: int,
-        t: int,
+        t: int = 0,
         g: Union[float, int] = 0,
         h: Union[float, int] = 0,
         f: Optional[Union[float, int]] = None,

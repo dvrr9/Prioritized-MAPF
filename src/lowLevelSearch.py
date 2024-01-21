@@ -120,12 +120,15 @@ def astar_timesteps(
 
 
     ast.add_to_open(start_node)
+    cnt = 0
 
     while not ast.open_is_empty():
+        print(len(ast._open), cnt, ca_table.last_visited(goal_i, goal_j))
+        cnt += 1
         cur = ast.get_best_node_from_open()
         if cur is None:
             break
-        if cur.i == goal_i and cur.j == goal_j and  cur.t > ca_table.last_visited(goal_i, goal_j):
+        if cur.i == goal_i and cur.j == goal_j and cur.t > ca_table.last_visited(goal_i, goal_j):
             return True, cur, steps, len(ast), ast.opened, ast.expanded
         ast.add_to_closed(cur)
         for i, j in get_neighbors_timestep(cur.i, cur.j, cur.t, task_map, ca_table):

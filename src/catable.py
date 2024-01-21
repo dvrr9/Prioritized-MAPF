@@ -85,22 +85,14 @@ class CATable:
         bool
             True if the move is permissible without causing a collision, False otherwise.
         """
-   
-
         #vertex
-
-      
-
-        if (i2, j2, t_start+1) in self._pos_time_table or self._max_time_table.get((i2, j2), t_start + 2) < t_start + 1:
+        if (i2, j2, t_start+1) in self._pos_time_table or self._max_time_table.get((i2, j2), t_start + 2) <= t_start + 1:
             return False
         
-
         #edge
-
-        if  ((i1, j1, t_start+1) in self._pos_time_table and 
-            (i2, j2, t_start) in self._pos_time_table and 
-            self._pos_time_table.get((i1, j1, t_start+1), set()).intersection(self._pos_time_table.get((i2, j2, t_start), set()))
-            ):
+        if  self._pos_time_table.get((i1, j1, t_start+1), set()).intersection(
+            self._pos_time_table.get((i2, j2, t_start), set())
+        ):
             return False
         
         return True
