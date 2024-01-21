@@ -1537,7 +1537,6 @@ def read_tasks_from_file(path: str) -> npt.NDArray:
             tasks[-1].append(float(values[-1]))
     return np.array(sorted(tasks, key=lambda x: x[-1]))
 
-tasks = read_tasks_from_file('scen-even/random-32-32-20-even-1.scen')
 
 
 def test(search_function, scen_path, map_path, *args) -> Dict:

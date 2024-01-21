@@ -196,6 +196,16 @@ def check_path(
         path, *process_dyn_obstacles(dyn_obst_traj)
     )
 
+def check_paths(starts, goals, paths):
+    for i, path in enumerate(paths):
+        start = starts[i]
+        goal = goals[i]
+        dyn_obst_traj = [paths[j] for j in range(len(path)) if j != i]
+        if not check_path(start, goal, path, dyn_obst_traj):
+            return False
+    return True
+
+
 def simple_test(search_function: Callable, task: Union[int, None], *args):
     """
     Function `simple_test` runs `search_function` on one task. Use a number from 0 to 24 to choose a specific debug task

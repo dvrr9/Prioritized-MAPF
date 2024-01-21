@@ -135,7 +135,7 @@ def PBS(starts, goals, task_map, search_function, *args):
             hp_agent = priorities[-1][1]
             priority_matrix[hp_agent][lp_agent] = 1
             priority_matrix[lp_agent][hp_agent] = 0
-
+       
         collision = node.find_collision()
         if collision is None:
             return node.plan

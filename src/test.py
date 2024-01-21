@@ -3,8 +3,9 @@ from my_read import read_map_from_file, read_tasks_from_file
 import time
 from map import Map
 import traceback
+from tqdm import tqdm
 
-def test(search_function, scen_path, map_path, *args) -> Dict:
+def test(search_function, scen_path, map_path, min_agent_cnt, max_agent_cnt, agent_step, *args) -> Dict:
     """
     The `massive_test` function runs the `search_function` on a set of different tasks
     (for example, from the directory `data/`) using *args as optional arguments.
@@ -41,10 +42,9 @@ def test(search_function, scen_path, map_path, *args) -> Dict:
     }
     
     
-    max_agent_cnt = 30
     cells = read_map_from_file(map_path)
     task_map = Map(cells)
-    for agent_num in range(1, max_agent_cnt, 5):
+    for agent_num in tqdm(range(min_agent_cnt, max_agent_cnt, agent_step)):
         tmp_len = []
         tmp_corr = []
         tmp_time = []
@@ -68,15 +68,15 @@ def test(search_function, scen_path, map_path, *args) -> Dict:
                     tmp_corr.append(True)
                     tmp_time.append(end - start)
                 else:
-                    print(f"Task: #{agent_num}. Path not found!")
-                    tmp_len.append(-1)
-                    tmp_corr.append(True)
+                    #print(f"Task: #{agent_num}. Path not found!")
+                    tmp_len.append(0)
+                    tmp_corr.append(False)
                     tmp_time.append(end - start)
 
             except Exception as e:
                 print(f"Execution error: {e}")
                 traceback.print_exc()
-        stat["len"].append(sum(tmp_len) / 25)
+        stat["len"].append(sum(tmp_len) / sum(tmp_corr))
         stat["corr"].append(sum(tmp_corr) / 25)
         stat["time"].append(sum(tmp_time) / 25)
 
