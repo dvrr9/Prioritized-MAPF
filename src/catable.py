@@ -33,6 +33,7 @@ class CATable:
         self._pos_time_table = dict()
         self._max_time_table = dict()
         self._last_visit_table = dict()
+        self._trajectories = []
 
     def add_trajectory(self, traj_id: int, trajectory: List[Tuple[int, int]]):
         """
@@ -47,7 +48,7 @@ class CATable:
         trajectory : List[Tuple[int, int]]
             The trajectory represented as a sequence of grid positions (i, j).
         """
-        
+        self._trajectories.append(trajectory)
         for t, (i, j) in enumerate(trajectory):
             if (i, j, t) in self._pos_time_table:
                 self._pos_time_table[(i, j, t)].add(traj_id)

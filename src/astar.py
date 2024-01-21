@@ -1,5 +1,5 @@
 from typing import Tuple, Optional, Callable, Iterable, Type, Union, List
-from node import Node
+from node import NodeAStar
 from map import Map
 from searchTreePQD import SearchTreePQD
 
@@ -44,7 +44,7 @@ def astar(
     steps_limit: int,
     heuristic_func: Callable,
     search_tree: Type[SearchTreePQD],
-) -> Tuple[bool, Optional[Node], int, int, Optional[Iterable[Node]], Optional[Iterable[Node]]]:
+) -> Tuple[bool, Optional[NodeAStar], int, int, Optional[Iterable[NodeAStar]], Optional[Iterable[NodeAStar]]]:
     """
     Implements the A* search algorithm.
 
@@ -75,10 +75,10 @@ def astar(
     ast = search_tree()
     steps = 0
 
-    start_node = Node(start_i, start_j, g=0, h=heuristic_func(start_i, start_j, goal_i, goal_j))
+    start_node = NodeAStar(start_i, start_j, g=0, h=heuristic_func(start_i, start_j, goal_i, goal_j))
     ast.add_to_open(start_node)
 
-    goal_node = Node(goal_i, goal_j)
+    goal_node = NodeAStar(goal_i, goal_j)
 
     while not ast.open_is_empty():
         steps += 1
@@ -92,7 +92,7 @@ def astar(
         j1 = node.j
         neighbors = task_map.get_neighbors(i1, j1)
         for i2, j2 in neighbors:
-            new_node = Node(
+            new_node = NodeAStar(
                 i=i2,
                 j=j2,
                 g=node.g + compute_cost(i1, j1, i2, j2),

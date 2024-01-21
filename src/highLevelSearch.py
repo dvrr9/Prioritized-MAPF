@@ -112,6 +112,7 @@ def PBS(starts, goals, task_map, search_function, *args):
                 *args
             )
             if new_path is None:
+                print("Path wasn't found")
                 return False
             node.plan[curr_agent] = new_path
         node.update_cost()

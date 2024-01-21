@@ -46,9 +46,10 @@ def make_path(goal: Node) -> Tuple[List[Tuple[int, int]], Union[int, float]]:
 
     duration = goal.g
     current = goal
-    path = []
+    path = [(goal.i, goal.j)]
     while current.parent:
-        path.append((current.i, current.j))
+        for i in range(current.g - current.parent.g):
+            path.append((current.parent.i, current.parent.j))
         current = current.parent
-    path.append((current.i, current.j))
+    # path.append((current.i, current.j))
     return path[::-1], duration
