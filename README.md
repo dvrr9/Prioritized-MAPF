@@ -17,6 +17,22 @@ For **GPBS** algorithm we implemented following heuristics:
 On the low-level we use **SIPP** algorithm
 
 ## Usage
+First, you need to clone the repository:
+```
+git clone https://github.com/dvrr9/Prioritized-MAPF
+```
+After that you can run python script from ```/src``` directory:
+```
+python mapf.py <map_file_path> <scens_file_path> <algo_name> [output_file_name]
+```
+About arguments:
+> <map_file_path> - path to file with map in format from https://movingai.com/
+> 
+> <scens_file_path> - scenarios for agent in format from https://movingai.com/
+> 
+> <algo_name> - one of algorithms from: ["PP", "PBS", "GPBS"]
+> 
+> --output_file_name - (optional) filename to save paths constructed for agents
 
 ## References
 [1] Čáp, M., Novák, P., Kleiner, A. and Selecký, M., 2015. Prioritized planning algorithms for trajectory coordination of multiple mobile robots. IEEE transactions on automation science and engineering, 12(3), pp.835-849.
