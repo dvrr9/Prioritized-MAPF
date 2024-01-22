@@ -338,6 +338,8 @@ def GPBS(starts, goals, task_map, search_function, *args):
         priorities.add_priority(lower=new_node.priority[0], higher=new_node.priority[1])
         if update_plan(new_node, new_node.priority[0]):
             stack.append(new_node)
+        else:
+            last_conflict = new_node.priority
             # new_nodes.append(node1)
             # print(f"Node1 conflict after update: {node1.has_conflict(11, 84)}")
         priorities.remove_last_conflict()
