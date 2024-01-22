@@ -1,4 +1,7 @@
 from typing import Callable, Dict, Iterable, List, Optional, Tuple, Type, Union
+import random
+
+random.seed(239)
 
 class PTNode:
     def __init__(self, times_visited=0, parent=None, priority=None, plan=None) -> None:
@@ -25,6 +28,11 @@ class PTNode:
                     and self.plan[a1][time + 1] == pos2
                 )
             ):
+                # if (a1==11 or a2==11) and (a2==84 or a1==84):
+                    # if pos1 == pos2:
+                    #     print("VERTEX CONFLICT!")
+                    # else:
+                    #     print("EDGE CONFLICT")
                 return True
         if len(self.plan[a1]) != len(self.plan[a2]):
             stopped = a1 if len(self.plan[a1])==min_path_length else a2
@@ -33,6 +41,8 @@ class PTNode:
 
             for time in range(min_path_length, len(self.plan[other])):
                 if self.plan[other][time] == stop_pos:
+                    # if (a1==11 or a2==11) and (a2==84 or a1==84):
+                    #     print("STOP CONFLICT!")
                     return True
         return False
 
@@ -40,8 +50,12 @@ class PTNode:
         """
         Finds arbitrary collision if exists and returns pair of conflicting agents
         """
-        for a1 in range(len(self.plan)):
-            for a2 in range(a1 + 1, len(self.plan)):
+        list1 = list(range(len(self.plan)))
+        random.shuffle(list1)
+        for a1 in list1:
+            list2 = list(range(a1 + 1, len(self.plan)))
+            random.shuffle(list2)
+            for a2 in list2:
                 if self.has_conflict(a1, a2):
                     return (a1, a2)
         return None

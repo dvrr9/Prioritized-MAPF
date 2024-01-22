@@ -112,8 +112,8 @@ def get_successors(
 
     for neighbor in neighbors:
         i_n, j_n = neighbor
-        # if ca_table.check_move(i, j, i_n, j_n, t):
-        for interval_id, safe_interval in enumerate(safe_intervals[i_n][j_n]):
+        # ca_table.check_move(i, j, i_n, j_n, t):
+        for int_id, safe_interval in enumerate(safe_intervals[i_n][j_n]):
             # print(f"Check cell: {i_n}, {j_n}, int_id: {interval_id}, safe_interval: {safe_interval}")
             if safe_interval[0] > end_t or safe_interval[1] < start_t:
                 continue
@@ -131,7 +131,7 @@ def get_successors(
                     # if t < len(obstacle) and obstacle[t-1] == (i, j) and obstacle[t] == (node.i, node.j):
                     #     t = inf  # in this case we can't go to this cell
                     #     break
-            successors.append((i_n, j_n, interval_id, intersection_start))
+            successors.append((i_n, j_n, int_id, intersection_start))
     return successors
 
     # YOUR CODE HERE
@@ -227,7 +227,7 @@ def get_safe_intervals(task_map, ca_table):
         new_intervals = []
         prev_time = 0
         for obstacle in obstacles:
-            if prev_time < obstacle - 1:
+            if prev_time <= obstacle - 1:
                 new_intervals.append((prev_time, obstacle - 1))
             if obstacle_finish == obstacle:
                 break

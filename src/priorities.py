@@ -6,14 +6,10 @@ class Priorities:
         self.hl_edges = [set() for i in range(n_agents)] # edges from higher to lower priority agents
 
     def add_priority(self, lower: int, higher: int):
-        assert (
-            higher not in self.hl_edges[lower],
+        assert higher not in self.hl_edges[lower], \
             f"Agent with higher priority {higher} is already in lower priority agents for {lower}"
-        )
-        assert (
-            lower not in self.lh_edges[higher],
+        assert lower not in self.lh_edges[higher], \
             f"Agent with lower priority {lower} is already in higher priority agents for {higher}"
-        )
         self.lh_edges[lower].add(higher)
         self.hl_edges[higher].add(lower)
         self.priorities.append((lower, higher))

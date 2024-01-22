@@ -1,4 +1,5 @@
 import random
+import copy
 from collections import defaultdict
 
 from catable import CATable
@@ -94,17 +95,18 @@ def PBS(starts, goals, task_map, search_function, *args):
         for curr_agent in agents_to_update:
             hp_agents = priorities.get_higher_priority_agents(curr_agent)
             for hp_agent in hp_agents:
-                # print(hp_agent, curr_agent)
-                # print(node.has_conflict(curr_agent, hp_agent))
+                # # print(hp_agent, curr_agent)
+                # # print(node.has_conflict(curr_agent, hp_agent))
                 if node.has_conflict(curr_agent, hp_agent):
                     need_update[curr_agent] = True
                     break
-        # were_updated = []
+        were_updated = []
         for curr_agent in agents_to_update:
             if not need_update[curr_agent]:
                 continue
-            # were_updated.append(curr_agent)
+            were_updated.append(curr_agent)
             hp_agents = priorities.get_higher_priority_agents(curr_agent)
+            # print(f'Update path for agent: {curr_agent} | Higher priority agents: {hp_agents}')
             trajectories = [node.plan[hp_agent] for hp_agent in hp_agents]
             new_path = update_plan_for_agent(
                 root.plan[curr_agent][0][0],
@@ -134,10 +136,12 @@ def PBS(starts, goals, task_map, search_function, *args):
             stack.pop()
             if len(stack) == 0: # can't find paths for root (i.e. no solution found)
                 continue
-            priorities.remove_last_conflict()
+            # priorities.remove_last_conflict()
+            last_conflict = priorities.remove_last_conflict()
+            # print(f"Removing last conflict: {last_conflict}")
             continue
         # print("First visit to PTNode")
-        # print(f"CurrNode conflict after update: {node.has_conflict(2, 15)}")
+        # print(f"CurrNode conflict after update: {node.has_conflict(11, 84)}")
         if node.priority is not None:
             lower, higher = node.priority
             # print(f"Node conflict: {node.priority[0], node.priority[1]}")
@@ -151,21 +155,21 @@ def PBS(starts, goals, task_map, search_function, *args):
         node1 = PTNode(
             parent=node,
             priority=collision,
-            plan=node.plan.copy()
-            # plan=copy.deepcopy(node.plan)
+            # plan=node.plan.copy()
+            plan=copy.deepcopy(node.plan)
         )
         node2 = PTNode(
             parent=node,
             priority=tuple(reversed(collision)),
-            plan=node.plan.copy()
-            # plan=copy.deepcopy(node.plan)
+            # plan=node.plan.copy()
+            plan=copy.deepcopy(node.plan)
         )
 
         # print(f"Resolving conflict for first PTNode: {node1.priority[0], node1.priority[1]}")
         priorities.add_priority(lower=node1.priority[0], higher=node1.priority[1])
         if update_plan(node1, node1.priority[0]):
             new_nodes.append(node1)
-            # print(f"Node1 conflict after update: {node1.has_conflict(2, 15)}")
+            # print(f"Node1 conflict after update: {node1.has_conflict(11, 84)}")
         priorities.remove_last_conflict()
         # print("Resolving conflicts completed!")
 
@@ -173,7 +177,7 @@ def PBS(starts, goals, task_map, search_function, *args):
         priorities.add_priority(lower=node2.priority[0], higher=node2.priority[1])
         if update_plan(node2, node2.priority[0]):
             new_nodes.append(node2)
-            # print(f"Node1 conflict after update: {node2.has_conflict(2, 15)}")
+            # print(f"Node1 conflict after update: {node2.has_conflict(11, 84)}")
         priorities.remove_last_conflict()
         # print("Resolving conflicts completed!")
 
