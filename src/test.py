@@ -4,8 +4,9 @@ import time
 from map import Map
 import traceback
 from tqdm import tqdm
+from test_paths_corr import check_paths
 
-def test(search_function, scen_path, map_path, min_agent_cnt, max_agent_cnt, agent_step, *args) -> Dict:
+def test(search_function, scen_path, map_path, min_agent_cnt, max_agent_cnt, agent_step, scen_num, time_threshold, *args) -> Dict:
     """
     The `massive_test` function runs the `search_function` on a set of different tasks
     (for example, from the directory `data/`) using *args as optional arguments.
@@ -38,8 +39,10 @@ def test(search_function, scen_path, map_path, min_agent_cnt, max_agent_cnt, age
     stat = {
         "corr": [],
         "len": [],
-        "time": []
+        "time": [],
+        "corr_w_time_threshold": []
     }
+
     
     
     cells = read_map_from_file(map_path)
@@ -48,7 +51,8 @@ def test(search_function, scen_path, map_path, min_agent_cnt, max_agent_cnt, age
         tmp_len = []
         tmp_corr = []
         tmp_time = []
-        for scen_num in range(1, 26):
+        tmp_corr_w_time_threshold = []
+        for scen_num in range(1, scen_num + 1):
             tasks = read_tasks_from_file(scen_path + f"-{scen_num}.scen")
             starts = tasks[:agent_num, [0, 1]].astype(int).tolist()
             goals = tasks[:agent_num, [2, 3]].astype(int).tolist()
@@ -61,23 +65,27 @@ def test(search_function, scen_path, map_path, min_agent_cnt, max_agent_cnt, age
                 start = time.time()
                 plan = search_function(starts, goals, task_map, *args)
                 end = time.time()
+                is_corr_path = (not plan is None) and check_paths(starts, goals, plan)
 
-                if plan:
+                if is_corr_path:
                     path_length = [len(path) for path in plan]
                     tmp_len.append(sum(path_length))
-                    tmp_corr.append(True)
+                    tmp_corr.append(is_corr_path)
                     tmp_time.append(end - start)
+                    tmp_corr_w_time_threshold.append((end - start) < time_threshold)
                 else:
                     #print(f"Task: #{agent_num}. Path not found!")
                     tmp_len.append(0)
-                    tmp_corr.append(False)
+                    tmp_corr.append(is_corr_path)
+                    tmp_corr_w_time_threshold.append(is_corr_path)
                     tmp_time.append(end - start)
 
             except Exception as e:
                 print(f"Execution error: {e}")
                 traceback.print_exc()
-        stat["len"].append(sum(tmp_len) / sum(tmp_corr))
-        stat["corr"].append(sum(tmp_corr) / 25)
-        stat["time"].append(sum(tmp_time) / 25)
+        stat["len"].append(sum(tmp_len) / max(1, sum(tmp_corr)))
+        stat["corr"].append(sum(tmp_corr) / scen_num)
+        stat["corr_w_time_threshold"].append(sum(tmp_corr_w_time_threshold) / scen_num)
+        stat["time"].append(sum(tmp_time) / scen_num)
 
     return stat

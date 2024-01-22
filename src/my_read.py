@@ -25,4 +25,4 @@ def read_tasks_from_file(path: str) -> npt.NDArray:
             tasks[-1][0], tasks[-1][1] = tasks[-1][1], tasks[-1][0]
             tasks[-1][2], tasks[-1][3] = tasks[-1][3], tasks[-1][2]
             tasks[-1].append(float(values[-1]))
-    return np.array(sorted(tasks, key=lambda x: x[-1]))
+    return np.array(tasks)
