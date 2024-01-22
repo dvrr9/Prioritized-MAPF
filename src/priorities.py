@@ -37,7 +37,7 @@ class Priorities:
     def has_edge(self, lower: int, higher: int) -> bool:
         return higher in self.lh_edges[lower]
 
-    def get_lower_priority_agents(self, agent: int) -> list[int]:
+    def get_lower_priority_agents(self, agent: int) -> set[int]:
         lower_priority_agents = set()
         for new_agent in self.hl_edges[agent]:
             # print(f"{agent} (lower)-> {new_agent}")
@@ -45,7 +45,7 @@ class Priorities:
             lower_priority_agents.update(self.get_lower_priority_agents(new_agent))
         return lower_priority_agents
 
-    def get_higher_priority_agents(self, agent: int) -> list[int]:
+    def get_higher_priority_agents(self, agent: int) -> set[int]:
         higher_priority_agents = set()
         for new_agent in self.lh_edges[agent]:
             # print(f"{agent} (higher)-> {new_agent}")

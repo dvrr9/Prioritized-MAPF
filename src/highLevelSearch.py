@@ -1,11 +1,10 @@
 import random
+from collections import defaultdict
 
 from catable import CATable
 from PTnode import PTNode
 from priorities import Priorities
 from other import make_path
-
-from lowLevelSearch import manhattan_distance
 
 from astar import astar
 
@@ -70,7 +69,7 @@ def PBS(starts, goals, task_map, search_function, *args):
         # root.plan.append(update_plan_for_agent(*start, *goal, [], task_map, search_function, *args))
     priorities = Priorities(n_agents)
     stack = [root]
-    print("Initial paths for agents are constructed!")
+    # print("Initial paths for agents are constructed!")
 
     def topsort(agents: list[int]) -> list[int]:
         visited = [False for i in range(len(agents))]
@@ -85,20 +84,26 @@ def PBS(starts, goals, task_map, search_function, *args):
             topsort_order.append(agents[u])
         
         dfs(len(agents) - 1)
-        return reversed(topsort_order)
+        return topsort_order[::-1]
     
-    # conflict (a1, a2) a1 > a2 => update_plan(new_node, a2)
-    # a2 -> a1
-    # lh_agents: для агента a хранит список всехагентов большего приоритета
-    # hl_agents: для агента хранит список всех агентов меньшего приоритета
-    # u > v
-    # 1->2, 2->3, 1->3
-    # 1 2 3 => +3 +2 +1 => 1,2,3
     def update_plan(node: PTNode, agent: int) -> bool:
         agents = list(priorities.get_lower_priority_agents(agent))
         agents.append(agent)
         agents_to_update = topsort(agents)
+        need_update = defaultdict(bool)
         for curr_agent in agents_to_update:
+            hp_agents = priorities.get_higher_priority_agents(curr_agent)
+            for hp_agent in hp_agents:
+                # print(hp_agent, curr_agent)
+                # print(node.has_conflict(curr_agent, hp_agent))
+                if node.has_conflict(curr_agent, hp_agent):
+                    need_update[curr_agent] = True
+                    break
+        # were_updated = []
+        for curr_agent in agents_to_update:
+            if not need_update[curr_agent]:
+                continue
+            # were_updated.append(curr_agent)
             hp_agents = priorities.get_higher_priority_agents(curr_agent)
             trajectories = [node.plan[hp_agent] for hp_agent in hp_agents]
             new_path = update_plan_for_agent(
@@ -112,68 +117,65 @@ def PBS(starts, goals, task_map, search_function, *args):
                 *args
             )
             if new_path is None:
-                print("Path wasn't found")
+                # print("Path wasn't found")
                 return False
             node.plan[curr_agent] = new_path
+            for lp_agent in priorities.get_lower_priority_agents(curr_agent):
+                if node.has_conflict(curr_agent, lp_agent):
+                    need_update[lp_agent] = True
         node.update_cost()
+        # print(f"Successful paths update, were updated agents: {were_updated}")
         return True
 
     while len(stack):
         node = stack[-1]
         if node.times_visited:
-            print("Second visit to PTNode")
+            # print("Second visit to PTNode")
             stack.pop()
             if len(stack) == 0: # can't find paths for root (i.e. no solution found)
                 continue
-            last_removed_conflict = priorities.remove_last_conflict()
+            priorities.remove_last_conflict()
             continue
-            # lp_agent = priorities[-1][0]
-            # hp_agent = priorities[-1][1]
-            # priority_matrix[hp_agent][lp_agent] = -1
-            # priority_matrix[lp_agent][hp_agent] = -1
-            # priorities.pop()
-            # continue
-        print("First visit to PTNode")
+        # print("First visit to PTNode")
+        # print(f"CurrNode conflict after update: {node.has_conflict(2, 15)}")
         if node.priority is not None:
             lower, higher = node.priority
+            # print(f"Node conflict: {node.priority[0], node.priority[1]}")
             priorities.add_priority(lower=lower, higher=higher)
-        # if node.priority is not None:
-        #     priorities.append(node.priority)
-        #     lp_agent = priorities[-1][0]
-        #     hp_agent = priorities[-1][1]
-        #     priority_matrix[hp_agent][lp_agent] = 1
-        #     priority_matrix[lp_agent][hp_agent] = 0
        
         collision = node.find_collision()
         if collision is None:
             return node.plan
         
         new_nodes = []
-
         node1 = PTNode(
             parent=node,
             priority=collision,
-            plan=node.plan
+            plan=node.plan.copy()
+            # plan=copy.deepcopy(node.plan)
         )
         node2 = PTNode(
             parent=node,
             priority=tuple(reversed(collision)),
-            plan=node.plan
+            plan=node.plan.copy()
+            # plan=copy.deepcopy(node.plan)
         )
 
-        print("Resolving conflict for first PTNode")
+        # print(f"Resolving conflict for first PTNode: {node1.priority[0], node1.priority[1]}")
         priorities.add_priority(lower=node1.priority[0], higher=node1.priority[1])
         if update_plan(node1, node1.priority[0]):
-            new_nodes.append(node1)        
+            new_nodes.append(node1)
+            # print(f"Node1 conflict after update: {node1.has_conflict(2, 15)}")
         priorities.remove_last_conflict()
-        print("Resolving conflicts completed!")
+        # print("Resolving conflicts completed!")
 
-        print("Resolving conflict for second PTNode")
+        # print(f"Resolving conflict for second PTNode: {node2.priority[0], node2.priority[1]}")
         priorities.add_priority(lower=node2.priority[0], higher=node2.priority[1])
         if update_plan(node2, node2.priority[0]):
             new_nodes.append(node2)
+            # print(f"Node1 conflict after update: {node2.has_conflict(2, 15)}")
         priorities.remove_last_conflict()
-        print("Resolving conflicts completed!")
+        # print("Resolving conflicts completed!")
 
         new_nodes.sort(key=lambda x: x.cost, reverse=True)
         stack.extend(new_nodes)

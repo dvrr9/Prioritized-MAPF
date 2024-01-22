@@ -200,7 +200,7 @@ def check_paths(starts, goals, paths):
     for i, path in enumerate(paths):
         start = starts[i]
         goal = goals[i]
-        dyn_obst_traj = [paths[j] for j in range(len(path)) if j != i]
+        dyn_obst_traj = [paths[j] for j in range(len(paths)) if j != i]
         if not check_path(start, goal, path, dyn_obst_traj):
             return False
     return True
