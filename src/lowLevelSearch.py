@@ -105,7 +105,7 @@ def get_successors(
     neighbors.append((i, j))
 
     for neighbor in neighbors:
-        i_n, j_n = neighbors
+        i_n, j_n = neighbor
         for int_id, safe_interval in enumerate(safe_intervals[i_n][j_n]):
             if safe_interval[0] > end_t or safe_interval[1] < start_t:
                 continue
