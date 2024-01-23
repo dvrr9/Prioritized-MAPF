@@ -6,7 +6,6 @@ from lowLevelSearch import astar_timesteps, manhattan_distance, SearchTreePQD
 from draw import draw
 
 
-
 def get_map_data():
         map_str = dedent(
             """
@@ -41,6 +40,7 @@ paths = GPBS(
     manhattan_distance,
     SearchTreePQD
 )
+
 
 draw(
     grid_map=get_map_data(),

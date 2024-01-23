@@ -6,6 +6,7 @@ from searchTreePQD import SearchTreePQD
 
 import numpy as np
 
+
 def compute_cost_timesteps(i1: int, j1: int, i2: int, j2: int) -> Union[int, float]:
     """
     Computes the cost of simple moves between cells (i1, j1) and (i2, j2) - `wait` action is allowed.
@@ -31,17 +32,17 @@ def compute_cost_timesteps(i1: int, j1: int, i2: int, j2: int) -> Union[int, flo
     ValueError
         If trying to compute the cost of a non-supported move (only cardinal moves are supported).
     """
-
     d = abs(i1 - i2) + abs(j1 - j2)
-    if d == 0:  # wait
+    if d == 0: # wait
         return 1
-    elif d == 1:  # cardinal move
+    elif d == 1: # cardinal move
         return 1
     else:
         raise ValueError(
             "Trying to compute the cost of a non-supported move! ONLY cardinal moves are supported."
         )
-    
+
+
 def get_neighbors_timestep(
     i: int, j: int, t: int, grid_map: Map, ca_table: CATable
 ) -> List[Tuple[int, int]]:
@@ -71,10 +72,8 @@ def get_neighbors_timestep(
         i_n, j_n = neighbor
         if ca_table.check_move(i, j, i_n, j_n, t):
             results.append(neighbor)
-    
-
-    # YOUR CODE HERE
     return results
+
 
 def get_successors(
     i: int, j: int, t: int, interval_id, grid_map: Map, ca_table: CATable, safe_intervals
@@ -99,22 +98,15 @@ def get_successors(
         List of neighboring cell coordinates (i, j).
     """
     successors = []
-    start_t = t + 1  # the earliest time we can get to the successor
+    start_t = t + 1 # the earliest time we can get to the successor
     end_t = safe_intervals[i][j][interval_id][1] + 1 # the latest time -//-
 
     neighbors = grid_map.get_neighbors(i, j)
     neighbors.append((i, j))
-    # results = []
-    # for neighbor in neighbors:
-    #     i_n, j_n = neighbor
-    #     if ca_table.check_move(i, j, i_n, j_n, t):
-    #         results.append(neighbor)
 
     for neighbor in neighbors:
-        i_n, j_n = neighbor
-        # ca_table.check_move(i, j, i_n, j_n, t):
+        i_n, j_n = neighbors
         for int_id, safe_interval in enumerate(safe_intervals[i_n][j_n]):
-            # print(f"Check cell: {i_n}, {j_n}, int_id: {interval_id}, safe_interval: {safe_interval}")
             if safe_interval[0] > end_t or safe_interval[1] < start_t:
                 continue
 
@@ -122,20 +114,14 @@ def get_successors(
             
             # Check for possible edge collsion
             if intersection_start == safe_interval[0]: # otherwise in timestamp t-1 the cell is empty, no edge collisions
-                # edge
+                # Edge collision
                 if ca_table._pos_time_table.get((i, j, intersection_start), set()).intersection(
                     ca_table._pos_time_table.get((i_n, j_n, intersection_start - 1), set())
                 ):
                     continue
-                    # # edge collision condition
-                    # if t < len(obstacle) and obstacle[t-1] == (i, j) and obstacle[t] == (node.i, node.j):
-                    #     t = inf  # in this case we can't go to this cell
-                    #     break
             successors.append((i_n, j_n, int_id, intersection_start))
     return successors
 
-    # YOUR CODE HERE
-    return results
 
 def manhattan_distance(i1: int, j1: int, i2: int, j2: int) -> Union[int, float]:
     """
@@ -154,9 +140,8 @@ def manhattan_distance(i1: int, j1: int, i2: int, j2: int) -> Union[int, float]:
     int | float
         The Manhattan distance between the two specified cells.
     """
-    # YOUR CODE HERE
-    
     return abs(i1 - i2) + abs(j1 - j2)
+
 
 def astar_timesteps(
     task_map: Map,
@@ -174,19 +159,16 @@ def astar_timesteps(
     """
     Implementation of A* algorithm without re-expansion on dynamic obstacles domain.
     """
-
     ast = search_tree()
     steps = 0
     start_node = Node(
         start_i, start_j, g=0, h=heuristic_func(start_i, start_j, goal_i, goal_j)
     )
 
-
     ast.add_to_open(start_node)
     cnt = 0
 
     while not ast.open_is_empty():
-        # print(len(ast._open), cnt, ca_table.last_visited(goal_i, goal_j))
         cnt += 1
         cur = ast.get_best_node_from_open()
         if cur is None:
@@ -208,15 +190,13 @@ def astar_timesteps(
         
     return False, None, steps, len(ast), None, ast.expanded
 
+
 def get_safe_intervals(task_map, ca_table):
     safe_intervals = [[[(0, np.inf)] for _ in range(task_map._width)] for _ in range(task_map._height)]
     obstacle_in_cell = [[[] for _ in range(task_map._width)] for _ in range(task_map._height)]
     updated_cells = set()
 
     for trajectory in ca_table._trajectories:
-        # extended_path = self.extended_path(path)
-        # self.obstacles.append(extended_path)
-        # print(f"Check: {safe_intervals}")
         for t, (i, j) in enumerate(trajectory):
             updated_cells.add((i, j))
             obstacle_in_cell[i][j].append(t)
@@ -236,33 +216,8 @@ def get_safe_intervals(task_map, ca_table):
         # if no obstacles finish in this cell
         if obstacle_finish is None:
             new_intervals.append((prev_time, np.inf))
-        safe_intervals[i][j] = new_intervals
-    
+        safe_intervals[i][j] = new_intervals    
     return safe_intervals
-            
-        #     k = 0
-        #     new_safe_intervals = []
-        #     for interval in self._safe_intervals[i][j]:
-        #         while k < len(obstacle_in_cell[i][j]) and obstacle_in_cell[i][j][k] < interval.start:
-        #             k += 1
-
-        #         if k >= len(obstacle_in_cell[i][j]):
-        #             new_safe_intervals.append(interval)
-        #             continue
-
-        #         cur_start = interval.start
-        #         while k < len(obstacle_in_cell[i][j]) and obstacle_in_cell[i][j][k] <= interval.end:
-        #             cur_end = obstacle_in_cell[i][j][k] - 1
-        #             if cur_start <= cur_end:
-        #                 new_safe_intervals.append(SafeInterval(cur_start, cur_end))
-
-        #             cur_start = cur_end + 2
-        #             k += 1
-
-        #         if cur_start <= interval.end:
-        #             new_safe_intervals.append(SafeInterval(cur_start, interval.end))
-
-        #     self._safe_intervals[i][j] = new_safe_intervals
 
 
 def sipp(
@@ -283,16 +238,7 @@ def sipp(
     """
     ast = search_tree()
     steps = 0
-
-    # OPEN = Open()
-    # CLOSED = Closed()
-
-    # Вычислить safe_intervals для всех клеток TODO
     safe_intervals = get_safe_intervals(task_map, ca_table)
-    # print("Safe intervals:")
-    # print(safe_intervals)
-
-    # Расширить класс Node TODO
 
     start_node = Node(
         start_i, start_j, g=0, h=heuristic_func(start_i, start_j, goal_i, goal_j), interval_id=0
@@ -302,7 +248,6 @@ def sipp(
     cnt = 0
 
     while not ast.open_is_empty():
-        # print(len(ast._open), cnt, ca_table.last_visited(goal_i, goal_j))
         cnt += 1
         cur = ast.get_best_node_from_open()
         if cur is None:
@@ -311,7 +256,6 @@ def sipp(
             return True, cur, steps, len(ast), ast.opened, ast.expanded
         ast.add_to_closed(cur)
         for i, j, interval_id, t in get_successors(cur.i, cur.j, cur.g, cur.interval_id, task_map, ca_table, safe_intervals):
-            # print(f"Come from: ({cur.i, cur.j, cur.g}) to ({i}, {j}, {t})")
             h = heuristic_func(i, j, goal_i, goal_j)
             new_node = Node(i, j, g=t, h=h, interval_id=interval_id, parent=cur)
             if not ast.was_expanded(new_node):
@@ -321,19 +265,3 @@ def sipp(
             return False, None, steps, len(ast), None, ast.expanded
         
     return False, None, steps, len(ast), None, ast.expanded
-
-    while not OPEN.is_empty():
-        # cur_node = OPEN.get_best_node()
-        # CLOSED.add_node(cur_node)
-        if cur_node.i == goal_i and cur_node.j == goal_j:
-            self.publish_solution(cur_node)
-            return True, cur_node
-
-        for i, j, interval, t in grid_map.get_successors(cur_node):
-            h = self.heuristic_function(i, j, goal_i, goal_j)
-            new_node = Node(i, j, g=t, h=h, interval=interval, parent=cur_node)
-            if CLOSED.was_expanded(new_node):
-                continue
-            OPEN.add_node(new_node)
-
-    return False, None

@@ -6,6 +6,7 @@ import traceback
 from tqdm import tqdm
 from test_paths_corr import check_paths
 
+
 def test(search_function, scen_path, map_path, min_agent_cnt, max_agent_cnt, agent_step, scen_num, time_threshold, *args) -> Dict:
     """
     The `massive_test` function runs the `search_function` on a set of different tasks
@@ -43,8 +44,6 @@ def test(search_function, scen_path, map_path, min_agent_cnt, max_agent_cnt, age
         "corr_w_time_threshold": []
     }
 
-    
-    
     cells = read_map_from_file(map_path)
     task_map = Map(cells)
     for agent_num in tqdm(range(min_agent_cnt, max_agent_cnt, agent_step)):
@@ -59,8 +58,7 @@ def test(search_function, scen_path, map_path, min_agent_cnt, max_agent_cnt, age
 
             starts = [tuple(start) for start in starts]
             goals = [tuple(goal) for goal in goals]
-            
-            
+
             try:
                 start = time.time()
                 plan = search_function(starts, goals, task_map, *args)
@@ -74,7 +72,6 @@ def test(search_function, scen_path, map_path, min_agent_cnt, max_agent_cnt, age
                     tmp_time.append(end - start)
                     tmp_corr_w_time_threshold.append((end - start) < time_threshold)
                 else:
-                    #print(f"Task: #{agent_num}. Path not found!")
                     tmp_len.append(0)
                     tmp_corr.append(is_corr_path)
                     tmp_corr_w_time_threshold.append(is_corr_path)

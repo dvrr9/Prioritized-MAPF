@@ -2,6 +2,7 @@ import numpy.typing as npt
 from other import convert_string_to_cells
 import numpy as np
 
+
 def read_map_from_file(path: str) -> npt.NDArray:
     with open(path) as map_file:
         type = next(map_file).split(' ')[-1]
@@ -13,6 +14,7 @@ def read_map_from_file(path: str) -> npt.NDArray:
         map_str = "".join(map_lines)
         cells = convert_string_to_cells(map_str)
     return cells
+
 
 def read_tasks_from_file(path: str) -> npt.NDArray:
     tasks = []

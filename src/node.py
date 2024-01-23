@@ -1,5 +1,6 @@
 from typing import Callable, Dict, Iterable, List, Optional, Tuple, Type, Union
 
+
 class Node:
     """
     Represents a search node.
@@ -24,7 +25,6 @@ class Node:
         self,
         i: int,
         j: int,
-        # t: int = 0,
         g: Union[float, int] = 0,
         h: Union[float, int] = 0,
         interval_id = None,
@@ -54,7 +54,6 @@ class Node:
         self.g = g
         self.h = h
         self.interval_id = interval_id
-        # self.t = t
         if f is None:
             self.f = self.g + h
         else:
@@ -81,6 +80,7 @@ class Node:
         
         return self.f < other.f
 
+
 class NodeAStar:
     """
     Represents a search node.
@@ -105,7 +105,6 @@ class NodeAStar:
         self,
         i: int,
         j: int,
-        # t: int = 0,
         g: Union[float, int] = 0,
         h: Union[float, int] = 0,
         interval_id = None,
@@ -135,7 +134,6 @@ class NodeAStar:
         self.g = g
         self.h = h
         self.interval_id = interval_id
-        # self.t = t
         if f is None:
             self.f = self.g + h
         else:

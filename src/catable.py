@@ -1,6 +1,6 @@
 import math
-
 from typing import Callable, Dict, Iterable, List, Optional, Tuple, Type, Union
+
 
 class CATable:
     """
@@ -28,7 +28,6 @@ class CATable:
         in its goal position (i, j) at time t1 does not collide with a dynamic obstacle
         at time t2 > t1.
     """
-
     def __init__(self):
         self._pos_time_table = dict()
         self._max_time_table = dict()
@@ -64,8 +63,6 @@ class CATable:
             raise Exception('two agent end in the same spot')
         self._max_time_table[(i_last, j_last)] = t_last
 
-
-
     def check_move(self, i1: int, j1: int, i2: int, j2: int, t_start: int) -> bool:
         """
         Checks if the move from cell (i1, j1) to cell (i2, j2)
@@ -86,18 +83,17 @@ class CATable:
         bool
             True if the move is permissible without causing a collision, False otherwise.
         """
-        #vertex
+        # Vertex conflict
         if (i2, j2, t_start+1) in self._pos_time_table or self._max_time_table.get((i2, j2), t_start + 2) <= t_start + 1:
             return False
         
-        #edge
+        # Edge cconflict
         if  self._pos_time_table.get((i1, j1, t_start+1), set()).intersection(
             self._pos_time_table.get((i2, j2, t_start), set())
         ):
             return False
         
         return True
-
 
     def last_visited(self, i: int, j: int):
         """
@@ -121,7 +117,6 @@ class CATable:
         
         return self._last_visit_table.get((i, j), -1)
         
-
     def __is_cell_available(self, i: int, j: int, t: int) -> bool:
         """
         Checks if a cell (i, j) is available at the specified time moment t.
@@ -138,9 +133,6 @@ class CATable:
         bool
             True if the cell is not occupied at time t, False otherwise.
         """
-        # YOUR CODE HERE
-        
-        
         if (i, j, t) in self._pos_time_table:
             return False
         
@@ -173,7 +165,6 @@ class CATable:
             True if there is no reverse move along the same edge within the given time frame,
             False if there is a reverse move.
         """
-        # YOUR CODE HERE
         if  ((i1, j1, t_end) in self._pos_time_table and 
             (i2, j2, t_start) in self._pos_time_table and 
             self._pos_time_table[(i1, j1, t_end)] == self._pos_time_table[(i2, j2, t_start)]

@@ -4,11 +4,11 @@ import random
 
 random.seed(239)
 
+
 class PTNode:
     def __init__(self, times_visited=0, parent=None, priority=None, plan=None) -> None:
         self.times_visited = 0
         self.parent = parent
-        # TODO: add class for priority edges
         self.priority = priority # (lower, higher) priority agents
         self.plan = plan
         self.cost = sum(len(path) - 1 for path in self.plan)
@@ -37,12 +37,10 @@ class PTNode:
 
             for time in range(min_path_length, len(self.plan[other])):
                 if self.plan[other][time] == stop_pos:
-                    # if (a1==11 or a2==11) and (a2==84 or a1==84):
-                    #     print("STOP CONFLICT!")
                     return True
         return False
 
-    def find_collision(self): #TODO: check for those without constraint
+    def find_collision(self):
         """
         Finds arbitrary collision if exists and returns pair of conflicting agents
         """
@@ -67,7 +65,6 @@ class PTNodeGPBS:
     def __init__(self, n_agents, times_visited=0, parent=None, priority=None, plan=None) -> None:
         self.times_visited = 0
         self.parent = parent
-        # TODO: add class for priority edges
         self.priority = priority # (lower, higher) priority agents
         self.n_agents = n_agents
         self.agent_conflicts = [set() for i in range(n_agents)]
@@ -98,12 +95,10 @@ class PTNodeGPBS:
 
             for time in range(min_path_length, len(self.plan[other])):
                 if self.plan[other][time] == stop_pos:
-                    # if (a1==11 or a2==11) and (a2==84 or a1==84):
-                    #     print("STOP CONFLICT!")
                     return ConflictType.GOAL_VERTEX
         return ConflictType.NO_CONFLICT
 
-    def find_collision(self, priorities): #TODO: check for those without constraint
+    def find_collision(self, priorities):
         """
         Finds arbitrary collision if exists and returns pair of conflicting agents
         """
@@ -140,17 +135,6 @@ class PTNodeGPBS:
                         max_new_conflicts = new_conflicts
                         arg_max = tuple(reversed(conflict))
                 return arg_max
-                    
-
-
-        # list1 = list(range(len(self.plan)))
-        # random.shuffle(list1)
-        # for a1 in list1:
-        #     list2 = list(range(a1 + 1, len(self.plan)))
-        #     random.shuffle(list2)
-        #     for a2 in list2:
-        #         if self.has_conflict(a1, a2) != ConflictType.NO_CONFLICT:
-        #             return (a1, a2)
         return None
 
     def update_cost(self):

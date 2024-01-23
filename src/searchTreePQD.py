@@ -18,8 +18,6 @@ class SearchTreePQD:
         Returns the size of the search tree. Useful for assessing the memory
         footprint of the algorithm, especially at the final iteration.
         """
-        # YOUR CODE HERE
-        
         return len(self._open) + len(self._closed)
 
     def open_is_empty(self) -> bool:
@@ -27,8 +25,6 @@ class SearchTreePQD:
         Checks if OPEN is empty.
         If true, the main search loop should be interrupted.
         """
-        # YOUR CODE HERE
-        
         return len(self._open) == 0
 
     def add_to_open(self, item: Node):
@@ -38,8 +34,6 @@ class SearchTreePQD:
         This implementation detects duplicates lazily; thus, nodes are added to
         OPEN without initial duplicate checks.
         """
-        # YOUR CODE HERE
-        
         heappush(self._open, item)
 
     def get_best_node_from_open(self) -> Optional[Node]:
@@ -52,8 +46,6 @@ class SearchTreePQD:
 
         Returns None if OPEN is empty.
         """
-        # YOUR CODE HERE
-        
         while not self.open_is_empty():
             item = heappop(self._open)
             if not item in self._closed:
@@ -65,15 +57,12 @@ class SearchTreePQD:
         """
         Adds a node to the CLOSED dictionary.
         """
-        # YOUR CODE HERE
-        
         self._closed[item] = item
 
     def was_expanded(self, item: Node) -> bool:
         """
         Checks if a node has been previously expanded.
         """
-        # YOUR CODE HERE
         return item in self._closed
 
     @property
@@ -87,4 +76,3 @@ class SearchTreePQD:
     @property
     def number_of_open_dublicates(self):
         return self._enc_open_dublicates
-    

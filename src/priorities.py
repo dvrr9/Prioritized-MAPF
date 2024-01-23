@@ -13,11 +13,6 @@ class Priorities:
         self.lh_edges[lower].add(higher)
         self.hl_edges[higher].add(lower)
         self.priorities.append((lower, higher))
-
-    # def remove_priority(self, lower: int, higher: int):
-    #     self.lh_edges[lower].remove(higher)
-    #     self.hl_edges[higher].remove(lower)
-    #     self.priorities.pop()
     
     def remove_last_conflict(self):
         lower, higher = self.priorities.pop()
@@ -36,7 +31,6 @@ class Priorities:
     def get_lower_priority_agents(self, agent: int) -> set[int]:
         lower_priority_agents = set()
         for new_agent in self.hl_edges[agent]:
-            # print(f"{agent} (lower)-> {new_agent}")
             lower_priority_agents.add(new_agent)
             lower_priority_agents.update(self.get_lower_priority_agents(new_agent))
         return lower_priority_agents
@@ -44,7 +38,6 @@ class Priorities:
     def get_higher_priority_agents(self, agent: int) -> set[int]:
         higher_priority_agents = set()
         for new_agent in self.lh_edges[agent]:
-            # print(f"{agent} (higher)-> {new_agent}")
             higher_priority_agents.add(new_agent)
             higher_priority_agents.update(self.get_higher_priority_agents(new_agent))
         return higher_priority_agents

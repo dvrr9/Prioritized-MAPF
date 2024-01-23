@@ -10,7 +10,6 @@ import os
 from map import Map
 
 
-
 def read_lists_from_file(path: str) -> List[List[Tuple[int, int]]]:
     """
     Reads data from a file and returns it in the form of a list of lists of tuples.
@@ -47,7 +46,7 @@ def read_lists_from_file(path: str) -> List[List[Tuple[int, int]]]:
             main_list.append(curr_list)
 
         return main_list
-    
+
 
 def check_start_goal(
     start: Tuple[int, int], goal: Tuple[int, int], trajectory: List[Tuple[int, int]]
@@ -103,6 +102,7 @@ def process_trajectory(
     last_times[trajectory[-1]] = math.inf
     max_times[trajectory[-1]] = len(trajectory) - 1
 
+
 def process_dyn_obstacles(
     dyn_obst_traj: List[List[Tuple[int, int]]]
 ) -> Tuple[Dict, Dict, Dict]:
@@ -125,6 +125,7 @@ def process_dyn_obstacles(
         process_trajectory(traj_id, trajectory, pos_time, max_times, last_times)
 
     return pos_time, max_times, last_times
+
 
 def check_collisions(
     trajectory: List[Tuple[int, int]], pos_time: Dict, max_times: Dict, last_times: Dict
@@ -167,6 +168,7 @@ def check_collisions(
         return False
     return True
 
+
 def check_path(
     start: Tuple[int, int],
     goal: Tuple[int, int],
@@ -195,6 +197,7 @@ def check_path(
     return check_start_goal(start, goal, path) and check_collisions(
         path, *process_dyn_obstacles(dyn_obst_traj)
     )
+
 
 def check_paths(starts, goals, paths):
     for i, path in enumerate(paths):
@@ -292,17 +295,3 @@ def simple_test(search_function: Callable, task: Union[int, None], *args):
     except Exception as e:
         print(f"Execution error: {e}")
         traceback.print_exc()
-
-
-
-
-
-    
-
-    
-
-
-
-
-
-

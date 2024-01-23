@@ -3,6 +3,7 @@ import numpy.typing as npt
 from node import Node
 import numpy as np
 
+
 def convert_string_to_cells(cell_str: str) -> npt.NDArray:
     """
     Converts a string representation of a grid map, with '#' for obstacles and '.' for free cells, into a binary matrix.
@@ -24,8 +25,6 @@ def convert_string_to_cells(cell_str: str) -> npt.NDArray:
         dtype=np.int8,
     )
     return cells
-
-
 
 
 def make_path(goal: Node) -> Tuple[List[Tuple[int, int]], Union[int, float]]:
@@ -51,5 +50,4 @@ def make_path(goal: Node) -> Tuple[List[Tuple[int, int]], Union[int, float]]:
         for i in range(current.g - current.parent.g):
             path.append((current.parent.i, current.parent.j))
         current = current.parent
-    # path.append((current.i, current.j))
     return path[::-1], duration
